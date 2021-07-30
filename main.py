@@ -1,5 +1,6 @@
 import os
 import time
+import keyboard
 from selenium import webdriver
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -8,6 +9,7 @@ from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 from ibm_watson import SpeechToTextV1
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
+from selenium.webdriver.common.action_chains import ActionChains
 
 
 def STT():
@@ -30,13 +32,20 @@ def STT():
             return text
 
 
-def Down_Submit(a_link, p_link):
+def Down_Submit(a_link, p_elem):
     for file in os.listdir():
         if file.endswith('.wav') or file.endswith('.png'):
             os.remove(file)
-    driver.execute_script(f"window.open('{a_link}');"), time.sleep(1)
-    driver.execute_script(f"window.open('{p_link}');")
+    driver.execute_script(f"window.open('{a_link}');"), time.sleep(3)
+    actionChains = ActionChains(driver)
+    actionChains.move_to_element(p_elem).context_click().perform()
+    for c in 'search':
+        keyboard.press_and_release(c)
+    keyboard.press('enter')
+    time.sleep(3)
     driver.switch_to.window(driver.window_handles[1])
+    img_link = driver.find_element_by_css_selector('.card-section img').get_attribute('src')
+    driver.get(img_link)
     driver.get_screenshot_as_file('./captcha.png')
     driver.switch_to.window(driver.window_handles[0])
     close_free_tabs()
@@ -50,8 +59,8 @@ def Down_Submit(a_link, p_link):
 
 def solution():
     audio_link = driver.find_element(By.CSS_SELECTOR, '#exampleCaptcha_SoundLink').get_attribute('href')
-    img_link = driver.find_element(By.XPATH, '//img[contains(@id,"CaptchaImage")]').get_attribute('src')
-    Down_Submit(audio_link, img_link), time.sleep(3)
+    img_elem = driver.find_element(By.XPATH, '//img[contains(@id,"CaptchaImage")]')
+    Down_Submit(audio_link, img_elem), time.sleep(3)
 
 
 def validate():
@@ -65,11 +74,11 @@ def validate():
     if not validation:
         driver.find_element(By.CSS_SELECTOR, 'img.BDC_ReloadIcon').click(), time.sleep(2)
         audio_link = driver.find_element(By.CSS_SELECTOR, '#exampleCaptcha_SoundLink').get_attribute('href')
-        img_link = driver.find_element(By.XPATH, '//img[contains(@id,"CaptchaImage")]').get_attribute('src')
+        img_elem = driver.find_element(By.XPATH, '//img[contains(@id,"CaptchaImage")]')
         captcha_elem = driver.find_element(By.CSS_SELECTOR, '#grantSchedulingFormID\:captchaCode')
         captcha_elem.send_keys(Keys.CONTROL, 'a')
         captcha_elem.send_keys(Keys.DELETE)
-        Down_Submit(audio_link, img_link)
+        Down_Submit(audio_link, img_elem)
     try:
         warn_message = driver.find_element(By.CSS_SELECTOR, 'span.ui-messages-warn-summary').text
         if warn_message == 'O captcha deve ser válido':
