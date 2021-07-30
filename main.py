@@ -32,7 +32,7 @@ def STT():
             return text
 
 
-def Down_Submit(a_link, p_elem):
+def down_submit(a_link, p_elem):
     for file in os.listdir():
         if file.endswith('.wav') or file.endswith('.png'):
             os.remove(file)
@@ -60,7 +60,7 @@ def Down_Submit(a_link, p_elem):
 def solution():
     audio_link = driver.find_element(By.CSS_SELECTOR, '#exampleCaptcha_SoundLink').get_attribute('href')
     img_elem = driver.find_element(By.XPATH, '//img[contains(@id,"CaptchaImage")]')
-    Down_Submit(audio_link, img_elem), time.sleep(3)
+    down_submit(audio_link, img_elem), time.sleep(3)
 
 
 def validate():
@@ -78,7 +78,7 @@ def validate():
         captcha_elem = driver.find_element(By.CSS_SELECTOR, '#grantSchedulingFormID\:captchaCode')
         captcha_elem.send_keys(Keys.CONTROL, 'a')
         captcha_elem.send_keys(Keys.DELETE)
-        Down_Submit(audio_link, img_elem)
+        down_submit(audio_link, img_elem)
     try:
         warn_message = driver.find_element(By.CSS_SELECTOR, 'span.ui-messages-warn-summary').text
         if warn_message == 'O captcha deve ser válido':
