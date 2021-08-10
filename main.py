@@ -4,61 +4,72 @@ import keyboard
 from selenium import webdriver
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException
 from webdriver_manager.chrome import ChromeDriverManager
-from ibm_watson import SpeechToTextV1
-from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 from selenium.webdriver.common.action_chains import ActionChains
 from anticaptchaofficial.imagecaptcha import imagecaptcha
 from PIL import Image
 
 
-def solve_img_captcha():
-    solver = imagecaptcha()
-    solver.set_verbose(1)
-    solver.set_key(os.environ['anti_key'])
-
-    im = Image.open(img_file)
-    im1 = im.crop((700, 500, 1700, 1000))
-    im1.save(img_file)
-
-    captcha_text = solver.solve_and_return_solution(img_file)
-    if captcha_text != 0:
-        print("captcha text " + captcha_text)
-    else:
-        print("task finished with error " + solver.error_code)
-    driver.find_element(By.CSS_SELECTOR, r'#grantSchedulingFormID\:captchaCode').send_keys(captcha_text), time.sleep(2)
-    driver.find_element(By.CSS_SELECTOR, r'#grantSchedulingFormID\:grantSchedulingContinueBtnID').click()
+def set_options():
+    options = webdriver.ChromeOptions()
+    prefs = {'download.default_directory': f'{os.getcwd()}'}
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    options.add_experimental_option('prefs', prefs)
+    options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    options.add_argument('start-maximized')
+    return options
 
 
-def STT():
-    apikey = 'tqytT0wUDusv4hGwf3sxV_x8-KW2BblSI1qbIRIluMp6'
-    url = 'https://api.us-south.speech-to-text.watson.cloud.ibm.com/instances/0dff1284-e4e7-49fe-a95a-b6dff6c9df50'
-    # Setup Service
-    authenticator = IAMAuthenticator(apikey)
-    stt = SpeechToTextV1(authenticator=authenticator)
-    stt.set_service_url(url)
-    # Perform conversion
+def fill_up_form(id_number, birth_date):
+    # Accept
+    driver.find_element(By.CSS_SELECTOR, 'button#j_idt71').click()
+    # Efetuar agendamento
+    driver.find_element(By.XPATH, '//span[contains(text(),"Efetuar")]').click()
+    # Nº b. i
+    driver.find_element(By.XPATH, '//input[@id = "scheduleForm:tabViewId:ccnum"]').send_keys(id_number)
+    # Data de nascimento
+    driver.find_element(By.XPATH,
+                        '//input[@id = "scheduleForm:tabViewId:dataNascimento_input"]').send_keys(birth_date)
+    # Pesquisar
+    driver.find_element(By.XPATH, '//span[contains(text(),"Pesquisar")]').click()
+    # Posto
+    post_elem = \
+        driver.find_element(By.XPATH,
+                            '//div[@id="scheduleForm:postcons_panel"]//ul[contains(@class,"ui-widget-content")]/li[2]')
+    driver.execute_script("arguments[0].click();", post_elem)
+    # Categoria do Ato Consular
+    cat_elem = \
+        driver.find_element(By.XPATH,
+                            '//div[@id="scheduleForm:categato_panel"]//ul[contains(@class,"ui-widget-content")]/li[3]')
+    driver.execute_script("arguments[0].click();", cat_elem)
+    # Ato Consular
+    consular_elem = \
+        driver.find_element(By.XPATH,
+                            '//div[@id="scheduleForm:atocons_panel"]//ul[contains(@class,"ui-widget-content")]/li[2]')
+    driver.execute_script("arguments[0].click();", consular_elem)
+    # Adicionar Ato Consular
+    driver.find_element(By.XPATH, '//span[contains(text(),"Ato Consular")]').click()
+    # declaro condições
+    driver.find_element(By.CSS_SELECTOR, 'div.ui-chkbox-box.ui-widget').click()
+    try:
+        driver.find_element(By.CSS_SELECTOR, 'button#j_idt263').click()
+    except ElementNotInteractableException:
+        pass
+    # Calendarizar
+    driver.find_element(By.XPATH, '//span[contains(text(),"Calendarizar")]').click()
+    # Captcha Solution
+    wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '[for="grantSchedulingFormID:captchaCode"]')))
 
-    for file in os.listdir(os.getcwd()):
-        if file.endswith('.wav'):
-            voice = os.path.join(os.getcwd(), file)
-            print(voice)
-            with open(voice, 'rb') as f:
-                res = stt.recognize(audio=f, content_type='audio/wav', model='en-US_NarrowbandModel',
-                                    continuous=False).get_result()
-            text = res['results'][0]['alternatives'][0]['transcript']
-            return text
 
-
-def down_submit(a_link, p_elem):
+def download_captcha_image():
+    img_elem = driver.find_element(By.XPATH, '//img[contains(@id,"CaptchaImage")]')
     for file in os.listdir():
         if file.endswith('.wav') or file.endswith('.png'):
             os.remove(file)
-    # driver.execute_script(f"window.open('{a_link}');"), time.sleep(3)
-    actionChains = ActionChains(driver)
-    actionChains.move_to_element(p_elem).context_click().perform()
+    action_chains = ActionChains(driver)
+    action_chains.move_to_element(img_elem).context_click().perform()
     for c in 'search':
         keyboard.press_and_release(c)
     keyboard.press('enter')
@@ -69,42 +80,31 @@ def down_submit(a_link, p_elem):
     driver.get_screenshot_as_file(img_file)
     driver.switch_to.window(driver.window_handles[0])
     close_free_tabs()
-    # text = STT()
-    # if not text:
-    #     text = 'None'
-    # print('text is ', text)
-    # driver.find_element(By.CSS_SELECTOR, '#grantSchedulingFormID\:captchaCode').send_keys(text), time.sleep(2)
-    # driver.find_element(By.CSS_SELECTOR, '#grantSchedulingFormID\:grantSchedulingContinueBtnID').click()
+    time.sleep(3)
 
 
-def solution():
-    audio_link = driver.find_element(By.CSS_SELECTOR, '#exampleCaptcha_SoundLink').get_attribute('href')
-    img_elem = driver.find_element(By.XPATH, '//img[contains(@id,"CaptchaImage")]')
-    down_submit(audio_link, img_elem), time.sleep(3)
+def solve_captcha():
+    solver = imagecaptcha()
+    solver.set_verbose(1)
+    solver.set_key(os.environ['anti_key'])
+
+    im = Image.open(img_file)
+    im1 = im.crop((700, 500, 1700, 1000))
+    im1.save(img_file)
+
+    text = solver.solve_and_return_solution(img_file)
+    if text != 0:
+        print("captcha text " + text)
+    else:
+        print("task finished with error " + solver.error_code)
+    return text
 
 
-def validate():
-    validation = True
-    try:
-        warn_message = driver.find_element(By.CSS_SELECTOR, 'span.ui-messages-warn-summary').text
-        if warn_message == 'O captcha deve ser válido':
-            validation = False
-    except:
-        pass
-    if not validation:
-        driver.find_element(By.CSS_SELECTOR, 'img.BDC_ReloadIcon').click(), time.sleep(2)
-        audio_link = driver.find_element(By.CSS_SELECTOR, '#exampleCaptcha_SoundLink').get_attribute('href')
-        img_elem = driver.find_element(By.XPATH, '//img[contains(@id,"CaptchaImage")]')
-        captcha_elem = driver.find_element(By.CSS_SELECTOR, r"#grantSchedulingFormID\:captchaCode")
-        captcha_elem.send_keys(Keys.CONTROL, 'a')
-        captcha_elem.send_keys(Keys.DELETE)
-        down_submit(audio_link, img_elem)
-    try:
-        warn_message = driver.find_element(By.CSS_SELECTOR, 'span.ui-messages-warn-summary').text
-        if warn_message == 'O captcha deve ser válido':
-            validate()
-    except:
-        pass
+def enter_captcha(text):
+    captcha_code = driver.find_element(By.CSS_SELECTOR, r'#grantSchedulingFormID\:captchaCode')
+    captcha_code.clear()
+    captcha_code.send_keys(text), time.sleep(2)
+    driver.find_element(By.CSS_SELECTOR, r'#grantSchedulingFormID\:grantSchedulingContinueBtnID').click()
 
 
 def close_free_tabs():
@@ -120,60 +120,33 @@ def close_free_tabs():
 
 
 if __name__ == '__main__':
-    options = webdriver.ChromeOptions()
-    # options.add_extension('.\\unlock.crx')
-    prefs = {'download.default_directory': f'{os.getcwd()}'}
-    options.add_argument("--disable-blink-features=AutomationControlled")
-    options.add_experimental_option('prefs', prefs)
-    options.add_experimental_option("excludeSwitches", ["enable-automation"])
-    options.add_argument('start-maximized')
-
     url = 'https://agendamentosonline.mne.pt/AgendamentosOnline/index.jsf'
     img_file = 'captcha.png'
-    driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+
+    driver = webdriver.Chrome(ChromeDriverManager().install(), options=set_options())
     driver.implicitly_wait(10)
     wait = WebDriverWait(driver, 15)
     driver.get(url)
 
-    '''Form Filling'''
-    # Accept
-    driver.find_element(By.CSS_SELECTOR, 'button#j_idt71').click()
-    # Efetuar agendamento
-    driver.find_element(By.XPATH, '//span[contains(text(),"Efetuar")]').click()
-    # Nº b. i
-    driver.find_element(By.XPATH, '//input[@id = "scheduleForm:tabViewId:ccnum"]').send_keys(9058392233)
-    # Data de nascimento
-    driver.find_element(By.XPATH,
-                        '//input[@id = "scheduleForm:tabViewId:dataNascimento_input"]').send_keys('24-04-1987')
-    # Pesquisar
-    driver.find_element(By.XPATH, '//span[contains(text(),"Pesquisar")]').click()
-    # Posto
-    Post_elem = \
-        driver.find_element(By.XPATH,
-                            '//div[@id="scheduleForm:postcons_panel"]//ul[contains(@class,"ui-widget-content")]/li[2]')
-    driver.execute_script("arguments[0].click();", Post_elem)
-    # Categoria do Ato Consular
-    Cat_elem = \
-        driver.find_element(By.XPATH,
-                            '//div[@id="scheduleForm:categato_panel"]//ul[contains(@class,"ui-widget-content")]/li[3]')
-    driver.execute_script("arguments[0].click();", Cat_elem)
-    # Ato Consular
-    Consular_elem = \
-        driver.find_element(By.XPATH,
-                            '//div[@id="scheduleForm:atocons_panel"]//ul[contains(@class,"ui-widget-content")]/li[2]')
-    driver.execute_script("arguments[0].click();", Consular_elem)
-    # Adicionar Ato Consular
-    driver.find_element(By.XPATH, '//span[contains(text(),"Ato Consular")]').click()
-    # declaro condições
-    driver.find_element(By.CSS_SELECTOR, 'div.ui-chkbox-box.ui-widget').click()
-    try:
-        driver.find_element(By.CSS_SELECTOR, 'button#j_idt263').click()
-    except:
-        pass
-    # Calendarizar
-    driver.find_element(By.XPATH, '//span[contains(text(),"Calendarizar")]').click()
-    # Captcha Solution
-    wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '[for="grantSchedulingFormID:captchaCode"]')))
-    solution()
-    solve_img_captcha()
-    # validate()
+    fill_up_form(os.environ['id_number'], os.environ['birthdate'])
+
+    download_captcha_image()
+    solution_text = solve_captcha()
+
+    while True:
+        enter_captcha(solution_text)
+        try:
+            warn_message = driver.find_element(By.CSS_SELECTOR, 'span.ui-messages-warn-summary').text
+            if warn_message == 'O captcha deve ser válido':
+                # TODO: refresh captcha
+                download_captcha_image()
+                solution_text = solve_captcha()
+        except NoSuchElementException:
+            # TODO:
+            #  if appointments():
+            #      print('Hooray')
+            #  else:
+            #      click Voltar function
+            #      driver.find_element(By.XPATH, '//span[contains(text(),"Calendarizar")]').click()
+            #      time.sleep(2)
+            pass
