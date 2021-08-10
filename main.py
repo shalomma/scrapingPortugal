@@ -83,6 +83,18 @@ def download_captcha_image():
     time.sleep(3)
 
 
+def close_free_tabs():
+    tabs = driver.window_handles
+    current_tab = driver.current_window_handle
+    for tab in tabs:
+        driver.switch_to.window(tab)
+        if tab == current_tab:
+            continue
+        else:
+            driver.close()
+    driver.switch_to.window(current_tab)
+
+
 def solve_captcha():
     solver = imagecaptcha()
     solver.set_verbose(1)
@@ -107,16 +119,13 @@ def enter_captcha(text):
     driver.find_element(By.CSS_SELECTOR, r'#grantSchedulingFormID\:grantSchedulingContinueBtnID').click()
 
 
-def close_free_tabs():
-    tabs = driver.window_handles
-    current_tab = driver.current_window_handle
-    for tab in tabs:
-        driver.switch_to.window(tab)
-        if tab == current_tab:
-            continue
-        else:
-            driver.close()
-    driver.switch_to.window(current_tab)
+def valid():
+    try:
+        warn_message = driver.find_element(By.CSS_SELECTOR, 'span.ui-messages-warn-summary').text
+        if warn_message == 'O captcha deve ser válido':
+            return False
+    except NoSuchElementException:
+        return True
 
 
 if __name__ == '__main__':
@@ -135,13 +144,12 @@ if __name__ == '__main__':
 
     while True:
         enter_captcha(solution_text)
-        try:
-            warn_message = driver.find_element(By.CSS_SELECTOR, 'span.ui-messages-warn-summary').text
-            if warn_message == 'O captcha deve ser válido':
-                # TODO: refresh captcha
-                download_captcha_image()
-                solution_text = solve_captcha()
-        except NoSuchElementException:
+        if not valid():
+            # TODO: refresh captcha
+            download_captcha_image()
+            solution_text = solve_captcha()
+        else:
+            print('valid')
             # TODO:
             #  if appointments():
             #      print('Hooray')
@@ -149,4 +157,4 @@ if __name__ == '__main__':
             #      click Voltar function
             #      driver.find_element(By.XPATH, '//span[contains(text(),"Calendarizar")]').click()
             #      time.sleep(2)
-            pass
+            break
