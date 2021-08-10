@@ -22,7 +22,7 @@ def set_options():
     return options
 
 
-def fill_up_form(id_number, birth_date):
+def fill_up_form(id_number, birthdate):
     # Accept
     driver.find_element(By.CSS_SELECTOR, 'button#j_idt71').click()
     # Efetuar agendamento
@@ -31,7 +31,7 @@ def fill_up_form(id_number, birth_date):
     driver.find_element(By.XPATH, '//input[@id = "scheduleForm:tabViewId:ccnum"]').send_keys(id_number)
     # Data de nascimento
     driver.find_element(By.XPATH,
-                        '//input[@id = "scheduleForm:tabViewId:dataNascimento_input"]').send_keys(birth_date)
+                        '//input[@id = "scheduleForm:tabViewId:dataNascimento_input"]').send_keys(birthdate)
     # Pesquisar
     driver.find_element(By.XPATH, '//span[contains(text(),"Pesquisar")]').click()
     # Posto
