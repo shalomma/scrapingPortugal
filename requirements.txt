@@ -3,3 +3,5 @@ ibm_watson==5.2.2
 keyboard==0.13.5
 selenium==3.141.0
 webdriver_manager==3.4.2
+anticaptchaofficial~=1.0.31
+Pillow~=8.3.1
