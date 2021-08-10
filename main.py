@@ -128,6 +128,16 @@ def valid():
         return True
 
 
+def appointments():
+    """
+    search for the following text:
+    'De momento não existem vagas disponíveis, por favor tente mais tarde.'
+    :return:
+    if exist False, else True
+    """
+    pass
+
+
 if __name__ == '__main__':
     url = 'https://agendamentosonline.mne.pt/AgendamentosOnline/index.jsf'
     img_file = 'captcha.png'
@@ -145,7 +155,7 @@ if __name__ == '__main__':
     while True:
         enter_captcha(solution_text)
         if not valid():
-            # TODO: refresh captcha
+            # TODO: click refresh captcha
             download_captcha_image()
             solution_text = solve_captcha()
         else:
