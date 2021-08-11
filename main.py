@@ -64,22 +64,8 @@ def fill_up_form(id_number, birthdate):
 
 
 def download_captcha_image():
-    img_elem = driver.find_element(By.XPATH, '//img[contains(@id,"CaptchaImage")]')
-    for file in os.listdir():
-        if file.endswith('.wav') or file.endswith('.png'):
-            os.remove(file)
-    action_chains = ActionChains(driver)
-    action_chains.move_to_element(img_elem).context_click().perform()
-    for c in 'search':
-        keyboard.press_and_release(c)
-    keyboard.press('enter')
     time.sleep(3)
-    driver.switch_to.window(driver.window_handles[1])
-    img_link = driver.find_element_by_css_selector('.card-section img').get_attribute('src')
-    driver.get(img_link)
-    driver.get_screenshot_as_file(img_file)
-    driver.switch_to.window(driver.window_handles[0])
-    close_free_tabs()
+    driver.save_screenshot(img_file)
     time.sleep(3)
 
 
