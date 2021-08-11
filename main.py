@@ -88,9 +88,7 @@ def close_free_tabs():
     current_tab = driver.current_window_handle
     for tab in tabs:
         driver.switch_to.window(tab)
-        if tab == current_tab:
-            continue
-        else:
+        if tab != current_tab:
             driver.close()
     driver.switch_to.window(current_tab)
 
