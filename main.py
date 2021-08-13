@@ -101,6 +101,7 @@ def reload_captcha():
 
 def valid():
     try:
+        time.sleep(2)
         warn_message = driver.find_element(By.CSS_SELECTOR, 'span.ui-messages-warn-summary').text
         if warn_message == 'O captcha deve ser válido':
             print('not valid solution')
@@ -119,6 +120,14 @@ def appointments():
         return False
     else:
         return True
+
+
+def set_appointment():
+    # Para finalizar a marcação, deve clicar no botão “Confirmar Agendamento”.
+    # 1. calender window 2. click Confirmar Agendamento 3. Confirmar Agendamento
+    # //*[@id="scheduleForm:submitScheduleBtn"]/span
+    # //*[@id="confirmForm:confSaveScheduleButton"]/span
+    return NotImplemented
 
 
 def back_to_captcha():
