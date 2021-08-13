@@ -158,7 +158,7 @@ if __name__ == '__main__':
             solution_text = solve_captcha()
         else:
             if appointments():
-                print('Hooray')
+                set_appointment()
             else:
                 back_to_captcha()
                 time.sleep(5)
