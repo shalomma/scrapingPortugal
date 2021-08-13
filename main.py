@@ -1,5 +1,7 @@
 import os
 import time
+import smtplib
+from email.mime.text import MIMEText
 from selenium import webdriver
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -113,13 +115,26 @@ def valid():
         return True
 
 
-def appointments():
+def are_appointments():
     text = driver.find_element(By.XPATH, '//*[@id="scheduleForm:j_idt164"]/div[2]/table/tbody/tr[1]/td').text
     print('Appointment:', text)
     if text == 'De momento não existem vagas disponíveis, por favor tente mais tarde.':
         return False
     else:
         return True
+
+
+def notify_by_mail():
+    msg = MIMEText('Appointment')
+    address = 'sha.maayan@gmail.com'
+    msg['Subject'] = 'Appointment'
+    msg['From'] = address
+    msg['To'] = address
+
+    # os.system('python -m smtpd -c DebuggingServer -n localhost:1025')
+    s = smtplib.SMTP('localhost', 1025)
+    s.sendmail(address, [address], msg.as_string())
+    s.quit()
 
 
 def set_appointment():
@@ -157,7 +172,8 @@ if __name__ == '__main__':
             download_captcha_image()
             solution_text = solve_captcha()
         else:
-            if appointments():
+            if are_appointments():
+                notify_by_mail()
                 set_appointment()
             else:
                 back_to_captcha()
