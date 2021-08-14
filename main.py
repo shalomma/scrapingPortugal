@@ -135,24 +135,24 @@ def are_appointments():
         return True
 
 
-def notify_by_whatsapp():
+def notify_by_whatsapp(text):
     account_sid = os.environ['TWILIO_ACCOUNT_SID']
     auth_token = os.environ['TWILIO_AUTH_TOKEN']
     client = Client(account_sid, auth_token)
 
     message = client.messages.create(
-        body='There are Appointments!',
+        body=text,
         from_=f"whatsapp:+{os.environ['twilio_whatsapp']}",
         to=f"whatsapp:+{os.environ['my_whatsapp']}"
     )
     print(message.sid)
 
 
-def notify_by_mail():
+def notify_by_mail(text):
     yag = yagmail.SMTP(os.environ['email'])
     yag.send(
         to=os.environ['email'],
-        subject="There are Appointments!",
+        subject=text,
         contents=''
     )
 
@@ -182,7 +182,10 @@ if __name__ == '__main__':
     download_captcha_image()
     solution_text = solve_captcha()
 
+    counter = 0
     while True:
+        counter += 1
+        print('try ', counter)
         enter_captcha(solution_text)
         if not valid():
             reload_captcha()
@@ -190,8 +193,8 @@ if __name__ == '__main__':
             solution_text = solve_captcha()
         else:
             if are_appointments():
-                notify_by_whatsapp()
-                notify_by_mail()
+                notify_by_whatsapp('There are Appointments!')
+                notify_by_mail('There are Appointments!')
                 set_appointment()
             else:
                 back_to_captcha()
