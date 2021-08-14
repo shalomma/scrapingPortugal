@@ -183,19 +183,22 @@ if __name__ == '__main__':
     solution_text = solve_captcha()
 
     counter = 0
-    while True:
-        counter += 1
-        print('try ', counter)
-        enter_captcha(solution_text)
-        if not valid():
-            reload_captcha()
-            download_captcha_image()
-            solution_text = solve_captcha()
-        else:
-            if are_appointments():
-                notify_by_whatsapp('There are Appointments!')
-                notify_by_mail('There are Appointments!')
-                set_appointment()
+    try:
+        while True:
+            counter += 1
+            print('try ', counter)
+            enter_captcha(solution_text)
+            if not valid():
+                reload_captcha()
+                download_captcha_image()
+                solution_text = solve_captcha()
             else:
-                back_to_captcha()
-                time.sleep(5)
+                if are_appointments():
+                    notify_by_whatsapp('There are Appointments!')
+                    notify_by_mail('There are Appointments!')
+                    set_appointment()
+                else:
+                    back_to_captcha()
+                    time.sleep(5)
+    except:
+        notify_by_whatsapp('process broke')
