@@ -12,6 +12,14 @@ from webdriver_manager.chrome import ChromeDriverManager
 from anticaptchaofficial.imagecaptcha import imagecaptcha
 
 
+def set_driver(url):
+    driver_ = webdriver.Chrome(ChromeDriverManager().install(), options=set_options())
+    driver_.implicitly_wait(10)
+    wait_ = WebDriverWait(driver_, 15)
+    driver_.get(url)
+    return driver_, wait_
+
+
 def set_options():
     options = webdriver.ChromeOptions()
     prefs = {'download.default_directory': f'{os.getcwd()}'}
@@ -66,6 +74,9 @@ def fill_up_form(id_number, birthdate):
 def download_captcha_image():
     time.sleep(3)
     # driver.find_element(By.XPATH, '//*[@id="grantSchedulingDialogID"]').screenshot(img_file)
+    # screenshot_as_bytes = driver.find_element(By.XPATH, '//*[@id="exampleCaptcha_CaptchaImageDiv"]').screenshot_as_png
+    # with open(img_file, 'wb') as f:
+    #     f.write(screenshot_as_bytes)
     driver.save_screenshot(img_file)
     time.sleep(3)
 
@@ -161,13 +172,10 @@ def back_to_captcha():
 
 
 if __name__ == '__main__':
-    url = 'https://agendamentosonline.mne.pt/AgendamentosOnline/index.jsf'
+    appointments_url = 'https://agendamentosonline.mne.pt/AgendamentosOnline/index.jsf'
     img_file = 'captcha.png'
 
-    driver = webdriver.Chrome(ChromeDriverManager().install(), options=set_options())
-    driver.implicitly_wait(10)
-    wait = WebDriverWait(driver, 15)
-    driver.get(url)
+    driver, wait = set_driver(appointments_url)
 
     fill_up_form(os.environ['id_number'], os.environ['birthdate'])
 
