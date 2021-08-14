@@ -1,7 +1,7 @@
-ibm_cloud_sdk_core==3.10.1
-ibm_watson==5.2.2
 keyboard==0.13.5
 selenium==3.141.0
 webdriver_manager==3.4.2
-anticaptchaofficial~=1.0.31
-Pillow~=8.3.1
+anticaptchaofficial==1.0.31
+Pillow==8.3.1
+yagmail==0.14.256
+twilio==6.63.0
