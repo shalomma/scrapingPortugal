@@ -25,6 +25,9 @@ class Driver:
     def close(self):
         self.driver.close()
 
+    def quit(self):
+        self.driver.quit()
+
     @staticmethod
     def set_options():
         options = webdriver.ChromeOptions()
@@ -180,11 +183,11 @@ if __name__ == '__main__':
     appointments_url = 'https://agendamentosonline.mne.pt/AgendamentosOnline/index.jsf'
     img_file = 'captcha.png'
 
-    driver = Driver()
     captcha_solver = CaptchaSolver(img_file)
     alerter = Alerter()
 
     while True:
+        driver = Driver()
         driver.open(appointments_url)
         driver.fill_up_form(os.environ['id_number'], os.environ['birthdate'])
 
@@ -210,7 +213,7 @@ if __name__ == '__main__':
                         driver.back_to_captcha()
                         delay(5 * 60)
         except KeyboardInterrupt:
-            sys.exit(0)
+            driver.quit()
         except (NoSuchElementException, ElementNotInteractableException):
             alerter.whatsapp('process broke')
-            driver.close()
+            driver.quit()
