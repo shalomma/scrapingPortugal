@@ -95,15 +95,16 @@ class Driver:
 
     def valid(self):
         try:
+            print('checking captcha solution validity')
             time.sleep(2)
             warn_message = self.driver.find_element(By.CSS_SELECTOR, 'span.ui-messages-warn-summary').text
             if warn_message == 'O captcha deve ser válido':
-                print('not valid solution')
+                print('not valid')
                 return False
             else:
                 raise Exception('unknown warning message')
         except NoSuchElementException:
-            print('valid solution')
+            print('valid')
             return True
 
     def are_appointments(self):
@@ -152,12 +153,14 @@ class Alerter:
         self.client = Client(account_sid, auth_token)
         self.yag = yagmail.SMTP(os.environ['email'])
 
-    def whatsapp(self, text):
-        self.client.messages.create(
-            body=text,
-            from_=f"whatsapp:+{os.environ['twilio_whatsapp']}",
-            to=f"whatsapp:+{os.environ['my_whatsapp']}"
-        )
+    def whatsapp(self, text, n_times=1):
+        for i in range(n_times, 0, -1):
+            self.client.messages.create(
+                body=text,
+                from_=f"whatsapp:+{os.environ['twilio_whatsapp']}",
+                to=f"whatsapp:+{os.environ['my_whatsapp']}"
+            )
+            time.sleep(3)
 
     def email(self, text):
         self.yag.send(
@@ -200,14 +203,14 @@ if __name__ == '__main__':
                     solution_text = captcha_solver()
                 else:
                     if driver.are_appointments():
-                        alerter.whatsapp('There are Appointments!')
+                        alerter.whatsapp('There are Appointments!', 4)
                         alerter.email('There are Appointments!')
                         driver.set_appointment()
                     else:
                         driver.back_to_captcha()
-                        delay(5)
+                        delay(5 * 60)
         except KeyboardInterrupt:
             sys.exit(0)
-        except NoSuchElementException:
+        except (NoSuchElementException, ElementNotInteractableException):
             alerter.whatsapp('process broke')
             driver.close()
