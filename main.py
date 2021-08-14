@@ -1,7 +1,8 @@
 import os
 import time
-import smtplib
-from email.mime.text import MIMEText
+import yagmail
+from PIL import Image
+from twilio.rest import Client
 from selenium import webdriver
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -9,7 +10,6 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException
 from webdriver_manager.chrome import ChromeDriverManager
 from anticaptchaofficial.imagecaptcha import imagecaptcha
-from PIL import Image
 
 
 def set_options():
@@ -124,17 +124,26 @@ def are_appointments():
         return True
 
 
-def notify_by_mail():
-    msg = MIMEText('Appointment')
-    address = 'sha.maayan@gmail.com'
-    msg['Subject'] = 'Appointment'
-    msg['From'] = address
-    msg['To'] = address
+def notify_by_whatsapp():
+    account_sid = os.environ['TWILIO_ACCOUNT_SID']
+    auth_token = os.environ['TWILIO_AUTH_TOKEN']
+    client = Client(account_sid, auth_token)
 
-    # os.system('python -m smtpd -c DebuggingServer -n localhost:1025')
-    s = smtplib.SMTP('localhost', 1025)
-    s.sendmail(address, [address], msg.as_string())
-    s.quit()
+    message = client.messages.create(
+        body='There are Appointments!',
+        from_=f"whatsapp:+{os.environ['twilio_whatsapp']}",
+        to=f"whatsapp:+{os.environ['my_whatsapp']}"
+    )
+    print(message.sid)
+
+
+def notify_by_mail():
+    yag = yagmail.SMTP(os.environ['email'])
+    yag.send(
+        to=os.environ['email'],
+        subject="There are Appointments!",
+        contents=''
+    )
 
 
 def set_appointment():
@@ -173,6 +182,7 @@ if __name__ == '__main__':
             solution_text = solve_captcha()
         else:
             if are_appointments():
+                notify_by_whatsapp()
                 notify_by_mail()
                 set_appointment()
             else:
