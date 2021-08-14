@@ -4,3 +4,4 @@ venv/
 unlock.crx
 *.png
 *.wav
+env.sh
