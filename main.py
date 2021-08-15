@@ -184,6 +184,7 @@ def delay(seconds):
 
 def quick_lunch(url):
     driver_ = Driver(headless=False)
+    driver_.driver.implicitly_wait(1)
     driver_.open(url)
     driver_.fill_up_form(os.environ['id_number'], os.environ['birthdate'])
 
