@@ -14,8 +14,8 @@ from anticaptchaofficial.imagecaptcha import imagecaptcha
 
 
 class Driver:
-    def __init__(self):
-        self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=self.set_options())
+    def __init__(self, headless=True):
+        self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=self.set_options(headless))
         self.driver.implicitly_wait(10)
         self.wait = WebDriverWait(self.driver, 15)
 
@@ -29,19 +29,20 @@ class Driver:
         self.driver.quit()
 
     @staticmethod
-    def set_options():
+    def set_options(headless):
         options = webdriver.ChromeOptions()
         prefs = {'download.default_directory': f'{os.getcwd()}'}
         options.add_argument("--disable-blink-features=AutomationControlled")
         options.add_experimental_option('prefs', prefs)
         options.add_experimental_option("excludeSwitches", ["enable-automation"])
-        options.add_argument('start-maximized')
-        options.add_argument("headless")
-        options.add_argument("window-size=2880,1800")
-        options.add_argument("start-maximized")
-        options.add_argument("disable-gpu")
-        options.add_argument('disable-extensions')
-        options.add_argument('no-sandbox')
+        if headless:
+            options.add_argument('start-maximized')
+            options.add_argument("headless")
+            options.add_argument("window-size=2880,1800")
+            options.add_argument("start-maximized")
+            options.add_argument("disable-gpu")
+            options.add_argument('disable-extensions')
+            options.add_argument('no-sandbox')
         return options
 
     def fill_up_form(self, id_number, birthdate):
@@ -184,6 +185,12 @@ def delay(seconds):
         time.sleep(1)
 
 
+def quick_lunch(url):
+    driver_ = Driver(headless=False)
+    driver_.open(url)
+    driver_.fill_up_form(os.environ['id_number'], os.environ['birthdate'])
+
+
 if __name__ == '__main__':
     appointments_url = 'https://agendamentosonline.mne.pt/AgendamentosOnline/index.jsf'
     img_file = 'captcha.png'
@@ -213,6 +220,7 @@ if __name__ == '__main__':
                     if driver.are_appointments():
                         alerter.whatsapp('There are Appointments!', 4)
                         alerter.email('There are Appointments!')
+                        quick_lunch(appointments_url)
                         driver.set_appointment()
                     else:
                         driver.back_to_captcha()
