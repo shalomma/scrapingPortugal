@@ -239,4 +239,5 @@ if __name__ == '__main__':
             sys.exit(1)
         except (NoSuchElementException, ElementNotInteractableException, TimeoutException):
             alerter.whatsapp('Your appointment code is broken')
+            delay(120)
             driver.quit()
