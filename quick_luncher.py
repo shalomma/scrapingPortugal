@@ -12,6 +12,5 @@ def quick_lunch(url):
 
 
 if __name__ == '__main__':
-    appointments_url = 'https://agendamentosonline.mne.pt/AgendamentosOnline/app/scheduleAppointmentForm.jsf'
-    quick_lunch(appointments_url)
+    quick_lunch(os.environ['appointments_url'])
     time.sleep(500)
