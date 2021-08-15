@@ -99,18 +99,17 @@ class Driver:
         self.driver.find_element(By.XPATH, '//*[@id="exampleCaptcha_ReloadIcon"]').click()
 
     def valid(self):
-        try:
-            print('Checking validity: ', end='', flush=True)
-            time.sleep(2)
-            warn_message = self.driver.find_element(By.CSS_SELECTOR, 'span.ui-messages-warn-summary').text
-            if warn_message == 'O captcha deve ser válido':
-                print('not valid')
-                return False
-            else:
-                raise Exception('unknown warning message')
-        except NoSuchElementException:
+        print('Checking validity: ', end='', flush=True)
+        time.sleep(1)
+        warn_message = self.driver.find_element(By.XPATH, '//*[@id="scheduleForm:infoMsgs_container"]').text
+        if warn_message == 'O captcha deve ser válido':
+            print('not valid')
+            return False
+        elif warn_message == '':
             print('valid')
             return True
+        else:
+            raise Exception('Unknown msg: \n', warn_message)
 
     def are_appointments(self):
         text = self.driver.find_element(By.XPATH, '//*[@id="scheduleForm:j_idt164"]/div[2]/table/tbody/tr[1]/td').text
