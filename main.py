@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import yagmail
 from PIL import Image
@@ -218,6 +219,7 @@ if __name__ == '__main__':
                         delay(5 * 60)
         except KeyboardInterrupt:
             driver.quit()
+            sys.exit(1)
         except (NoSuchElementException, ElementNotInteractableException, TimeoutException):
             alerter.whatsapp('process broke')
             driver.quit()
