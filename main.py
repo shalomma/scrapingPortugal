@@ -94,15 +94,7 @@ class Driver:
             self.driver.find_element(By.XPATH, '//*[@id="exampleCaptcha_CaptchaImageDiv"]').screenshot_as_png
         with open(file, 'wb') as f:
             f.write(screenshot_as_bytes)
-        # self.driver.save_screenshot(file)
-        # self.crop(file)
         time.sleep(3)
-
-    @staticmethod
-    def crop(file):
-        im = Image.open(file)
-        im = im.crop((700, 500, 1700, 1000))
-        im.save(file)
 
     def reload_captcha(self):
         self.driver.find_element(By.XPATH, '//*[@id="exampleCaptcha_ReloadIcon"]').click()
