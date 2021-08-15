@@ -201,7 +201,6 @@ def quick_lunch(url):
 
 
 if __name__ == '__main__':
-    appointments_url = 'https://agendamentosonline.mne.pt/AgendamentosOnline/app/scheduleAppointmentForm.jsf'
     img_file = 'captcha.png'
 
     captcha_solver = CaptchaSolver(img_file)
@@ -209,7 +208,7 @@ if __name__ == '__main__':
 
     while True:
         driver = Driver(headless=True, page_load=True)
-        driver.open(appointments_url)
+        driver.open(os.environ['appointments_url'])
         driver.fill_up_form(os.environ['id_number'], os.environ['birthdate'])
 
         driver.download(img_file)
@@ -229,7 +228,7 @@ if __name__ == '__main__':
                     if driver.are_appointments():
                         alerter.whatsapp('Your appointment code is here', 4)
                         alerter.email('There are Appointments!')
-                        quick_lunch(appointments_url)
+                        quick_lunch(os.environ['appointments_url'])
                         # driver.set_appointment()
                         delay(120)
                     else:
