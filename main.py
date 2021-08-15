@@ -219,10 +219,10 @@ if __name__ == '__main__':
                         alerter.whatsapp('Your appointment code is here', 4)
                         alerter.email('There are Appointments!')
                         quick_lunch(appointments_url)
-                        driver.set_appointment()
+                        # driver.set_appointment()
                     else:
                         driver.back_to_captcha()
-                        delay(5 * 60)
+                    delay(5 * 60)
         except KeyboardInterrupt:
             driver.quit()
             sys.exit(1)
