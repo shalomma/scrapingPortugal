@@ -112,10 +112,13 @@ class Driver:
 
     def are_appointments(self):
         text = self.driver.find_element(By.XPATH, '//*[@id="scheduleForm:j_idt164"]/div[2]/table/tbody/tr[1]/td').text
-        print('Appointment:', text.encode('ascii', 'ignore').decode('ascii'))
         if text == 'De momento não existem vagas disponíveis, por favor tente mais tarde.':
+            print('Appointment:', text.encode('ascii', 'ignore').decode('ascii'))
             return False
         else:
+            print('#' * 20)
+            print('Appointment!')
+            print('#' * 20)
             return True
 
     @staticmethod
