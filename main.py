@@ -1,5 +1,4 @@
 import os
-import sys
 import time
 import yagmail
 from PIL import Image
@@ -36,6 +35,12 @@ class Driver:
         options.add_experimental_option('prefs', prefs)
         options.add_experimental_option("excludeSwitches", ["enable-automation"])
         options.add_argument('start-maximized')
+        options.add_argument("headless")
+        options.add_argument("window-size=2880,1800")
+        options.add_argument("start-maximized")
+        options.add_argument("disable-gpu")
+        options.add_argument('disable-extensions')
+        options.add_argument('no-sandbox')
         return options
 
     def fill_up_form(self, id_number, birthdate):
@@ -44,7 +49,7 @@ class Driver:
         self.driver.find_element(By.XPATH, '//input[@id = "scheduleForm:tabViewId:ccnum"]').send_keys(id_number)
         self.driver.find_element(
             By.XPATH, '//input[@id = "scheduleForm:tabViewId:dataNascimento_input"]').send_keys(birthdate)
-        self.driver.find_element(By.XPATH, '//span[contains(text(),"Pesquisar")]').click()  # Pesquisar
+        self.driver.find_element(By.XPATH, '//*[@id="scheduleForm:tabViewId:searchIcon"]/span').click()  # Pesquisar
         post_elem = \
             self.driver.find_element(
                 By.XPATH, '//div[@id="scheduleForm:postcons_panel"]//ul[contains(@class,"ui-widget-content")]/li[2]')
@@ -78,13 +83,12 @@ class Driver:
 
     def download(self, file):
         time.sleep(3)
-        # driver.find_element(By.XPATH, '//*[@id="grantSchedulingDialogID"]').screenshot(img_file)
-        # screenshot_as_bytes = \
-        # driver.find_element(By.XPATH, '//*[@id="exampleCaptcha_CaptchaImageDiv"]').screenshot_as_png
-        # with open(img_file, 'wb') as f:
-        #     f.write(screenshot_as_bytes)
-        self.driver.save_screenshot(file)
-        self.crop(file)
+        screenshot_as_bytes = \
+            self.driver.find_element(By.XPATH, '//*[@id="exampleCaptcha_CaptchaImageDiv"]').screenshot_as_png
+        with open(file, 'wb') as f:
+            f.write(screenshot_as_bytes)
+        # self.driver.save_screenshot(file)
+        # self.crop(file)
         time.sleep(3)
 
     @staticmethod
