@@ -218,7 +218,7 @@ if __name__ == '__main__':
                     solution_text = captcha_solver()
                 else:
                     if driver.are_appointments():
-                        alerter.whatsapp('There are Appointments!', 4)
+                        alerter.whatsapp('Your appointment code is here', 4)
                         alerter.email('There are Appointments!')
                         quick_lunch(appointments_url)
                         driver.set_appointment()
@@ -229,5 +229,5 @@ if __name__ == '__main__':
             driver.quit()
             sys.exit(1)
         except (NoSuchElementException, ElementNotInteractableException, TimeoutException):
-            alerter.whatsapp('process broke')
+            alerter.whatsapp('Your appointment code is broken')
             driver.quit()
