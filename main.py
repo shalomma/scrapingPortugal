@@ -6,15 +6,15 @@ from PIL import Image
 from twilio.rest import Client
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException, TimeoutException
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException, TimeoutException
 from anticaptchaofficial.imagecaptcha import imagecaptcha
 
 
 class Driver:
     def __init__(self, headless=True):
         self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=self.set_options(headless))
-        self.driver.implicitly_wait(4)
+        self.driver.implicitly_wait(2)
 
     def open(self, url):
         self.driver.get(url)
@@ -222,7 +222,7 @@ if __name__ == '__main__':
                         # driver.set_appointment()
                     else:
                         driver.back_to_captcha()
-                    delay(5 * 60)
+                    delay(2 * 60)
         except KeyboardInterrupt:
             driver.quit()
             sys.exit(1)
