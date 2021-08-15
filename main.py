@@ -8,15 +8,16 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException, TimeoutException
 from anticaptchaofficial.imagecaptcha import imagecaptcha
 
 
 class Driver:
-    def __init__(self, headless=True):
+    def __init__(self, headless=True, page_load=True):
         self.driver = webdriver.Chrome(ChromeDriverManager().install(),
-                                       desired_capabilities=self.set_desired_capabilities(),
+                                       desired_capabilities=self.set_desired_capabilities(page_load),
                                        options=self.set_options(headless))
         self.wait = WebDriverWait(self.driver, timeout=10)
         self.driver.implicitly_wait(2)
@@ -31,10 +32,9 @@ class Driver:
         self.driver.quit()
 
     @staticmethod
-    def set_desired_capabilities():
+    def set_desired_capabilities(page_load):
         caps = DesiredCapabilities().CHROME
-        caps["pageLoadStrategy"] = "normal"
-        # caps["pageLoadStrategy"] = "none"  # Do not wait for full page load
+        caps["pageLoadStrategy"] = "normal" if page_load else "none"
         return caps
 
     @staticmethod
@@ -55,6 +55,7 @@ class Driver:
         return options
 
     def fill_up_form(self, id_number, birthdate):
+        self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '[for="scheduleForm:tabViewId:ccnum"]')))
         self.driver.find_element(By.XPATH, '//input[@id = "scheduleForm:tabViewId:ccnum"]').send_keys(id_number)
         self.driver.find_element(
             By.XPATH, '//input[@id = "scheduleForm:tabViewId:dataNascimento_input"]').send_keys(birthdate)
@@ -207,7 +208,7 @@ if __name__ == '__main__':
     alerter = Alerter()
 
     while True:
-        driver = Driver()
+        driver = Driver(headless=True, page_load=True)
         driver.open(appointments_url)
         driver.fill_up_form(os.environ['id_number'], os.environ['birthdate'])
 
