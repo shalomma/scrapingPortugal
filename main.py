@@ -231,9 +231,10 @@ if __name__ == '__main__':
                         alerter.email('There are Appointments!')
                         quick_lunch(appointments_url)
                         # driver.set_appointment()
+                        delay(120)
                     else:
                         driver.back_to_captcha()
-                    delay(2 * 60)
+                    delay(20)
         except KeyboardInterrupt:
             driver.quit()
             sys.exit(1)
