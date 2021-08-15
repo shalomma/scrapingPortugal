@@ -2,6 +2,7 @@ import os
 import sys
 import time
 import yagmail
+import numpy as np
 from PIL import Image
 from twilio.rest import Client
 from selenium import webdriver
@@ -179,6 +180,26 @@ class Alerter:
         )
 
 
+class Comparator:
+    def __init__(self, file):
+        self.file = file
+        self.images = [None, None]
+        self.same = False
+        self.i = 0
+
+    def push(self):
+        self.images[self.i] = Image.open(self.file)
+        self.i = (self.i + 1) % 2
+
+    def mse(self):
+        err = np.sum((self.img_prev.astype("float") - self.img_curr.astype("float")) ** 2)
+        err /= float(self.img_prev.shape[0] * self.img_prev.shape[1])
+        return err
+
+    def run(self):
+        self.same = True if self.mse() < 0.2 else False
+
+
 def delay(seconds):
     for i in range(seconds, 0, -1):
         print(f"{i // 60:02d}:{i % 60:02d}", end="\r", flush=True)
@@ -196,14 +217,16 @@ if __name__ == '__main__':
     img_file = 'captcha.png'
 
     captcha_solver = CaptchaSolver(img_file)
+    comparator = Comparator(img_file)
     alerter = Alerter()
 
     while True:
-        driver = Driver(headless=True, page_load=True)
+        driver = Driver(headless=False, page_load=True)
         driver.open(os.environ['appointments_url'])
         driver.fill_up_form(os.environ['id_number'], os.environ['birthdate'])
 
         driver.download(img_file)
+        comparator.set_prev()
         solution_text = captcha_solver()
 
         counter = 0
@@ -212,11 +235,7 @@ if __name__ == '__main__':
                 counter += 1
                 print('try ', counter)
                 driver.enter_captcha(solution_text)
-                if not driver.valid():
-                    driver.reload_captcha()
-                    driver.download(img_file)
-                    solution_text = captcha_solver()
-                else:
+                if comparator.same or driver.valid():
                     if driver.are_appointments():
                         alerter.whatsapp('Your appointment code is here', 4)
                         alerter.email('There are Appointments!')
@@ -226,6 +245,14 @@ if __name__ == '__main__':
                     else:
                         driver.back_to_captcha()
                     delay(20)
+                else:
+                    driver.reload_captcha()
+                    driver.download(img_file)
+                    solution_text = captcha_solver()
+                driver.download(img_file)
+                comparator.set_curr()
+                comparator.run()
+
         except KeyboardInterrupt:
             driver.quit()
             sys.exit(1)
