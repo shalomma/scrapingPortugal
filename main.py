@@ -14,7 +14,7 @@ from anticaptchaofficial.imagecaptcha import imagecaptcha
 class Driver:
     def __init__(self, headless=True):
         self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=self.set_options(headless))
-        self.driver.implicitly_wait(10)
+        self.driver.implicitly_wait(4)
 
     def open(self, url):
         self.driver.get(url)
