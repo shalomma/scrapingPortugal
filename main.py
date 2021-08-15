@@ -227,7 +227,8 @@ if __name__ == '__main__':
         except KeyboardInterrupt:
             driver.quit()
             sys.exit(1)
-        except (NoSuchElementException, ElementNotInteractableException, TimeoutException):
+        except (NoSuchElementException, ElementNotInteractableException, TimeoutException) as e:
+            print(e)
             alerter.whatsapp('Your appointment code is broken')
             delay(120)
             driver.quit()
