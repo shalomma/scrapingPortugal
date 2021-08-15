@@ -2,7 +2,6 @@ import os
 import sys
 import time
 import yagmail
-from PIL import Image
 from twilio.rest import Client
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -101,7 +100,7 @@ class Driver:
 
     def valid(self):
         try:
-            print('checking captcha solution validity')
+            print('Checking validity: ', end='', flush=True)
             time.sleep(2)
             warn_message = self.driver.find_element(By.CSS_SELECTOR, 'span.ui-messages-warn-summary').text
             if warn_message == 'O captcha deve ser válido':
@@ -116,12 +115,12 @@ class Driver:
     def are_appointments(self):
         text = self.driver.find_element(By.XPATH, '//*[@id="scheduleForm:j_idt164"]/div[2]/table/tbody/tr[1]/td').text
         if text == 'De momento não existem vagas disponíveis, por favor tente mais tarde.':
-            print('Appointment:', text.encode('ascii', 'ignore').decode('ascii'))
+            print(text.encode('ascii', 'ignore').decode('ascii'))
             return False
         else:
-            print('#' * 20)
+            print('#' * 80)
             print('Appointment!')
-            print('#' * 20)
+            print('#' * 80)
             return True
 
     @staticmethod
@@ -130,7 +129,7 @@ class Driver:
         # 1. calender window 2. click Confirmar Agendamento 3. Confirmar Agendamento
         # //*[@id="scheduleForm:submitScheduleBtn"]/span
         # //*[@id="confirmForm:confSaveScheduleButton"]/span
-        return NotImplemented
+        raise NotImplemented
 
     def back_to_captcha(self):
         self.driver.find_element(
