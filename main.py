@@ -4,6 +4,7 @@ import time
 import yagmail
 import numpy as np
 from PIL import Image
+from queue import Queue
 from twilio.rest import Client
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -115,14 +116,15 @@ class Driver:
             return True
 
     def are_appointments(self):
+        time.sleep(5)
         text = self.driver.find_element(By.XPATH, '//*[@id="scheduleForm:j_idt164"]/div[2]/table/tbody/tr[1]/td').text
         if text == 'De momento não existem vagas disponíveis, por favor tente mais tarde.':
             print('Appointment:', text.encode('ascii', 'ignore').decode('ascii'))
             return False
         else:
-            print('#' * 20)
+            print('#' * 60)
             print('Appointment!')
-            print('#' * 20)
+            print('#' * 60)
             return True
 
     @staticmethod
@@ -183,21 +185,30 @@ class Alerter:
 class Comparator:
     def __init__(self, file):
         self.file = file
-        self.images = [None, None]
-        self.same = False
-        self.i = 0
+        self.images = Queue(maxsize=2)
+        self.same = True
 
-    def push(self):
-        self.images[self.i] = Image.open(self.file)
-        self.i = (self.i + 1) % 2
+    def put(self):
+        self.images.put(np.array(Image.open(self.file)))
+
+    def reset(self):
+        self.images = Queue(maxsize=2)
+        self.same = True
 
     def mse(self):
-        err = np.sum((self.img_prev.astype("float") - self.img_curr.astype("float")) ** 2)
-        err /= float(self.img_prev.shape[0] * self.img_prev.shape[1])
+        err = np.sum((self.images.queue[0].astype("float") - self.images.queue[1].astype("float")) ** 2)
+        err /= float(self.images.queue[0].shape[0] * self.images.queue[0].shape[1])
         return err
 
     def run(self):
-        self.same = True if self.mse() < 0.2 else False
+        if self.images.full():
+            err = self.mse()
+            if err < 0.1:
+                self.same = True
+                print(f'The same captcha ({err})')
+            else:
+                self.same = False
+                print(f'Not the same captcha ({err})')
 
 
 def delay(seconds):
@@ -226,7 +237,6 @@ if __name__ == '__main__':
         driver.fill_up_form(os.environ['id_number'], os.environ['birthdate'])
 
         driver.download(img_file)
-        comparator.set_prev()
         solution_text = captcha_solver()
 
         counter = 0
@@ -234,24 +244,27 @@ if __name__ == '__main__':
             while True:
                 counter += 1
                 print('try ', counter)
-                driver.enter_captcha(solution_text)
-                if comparator.same or driver.valid():
-                    if driver.are_appointments():
-                        alerter.whatsapp('Your appointment code is here', 4)
-                        alerter.email('There are Appointments!')
-                        quick_lunch(os.environ['appointments_url'])
-                        # driver.set_appointment()
-                        delay(120)
-                    else:
-                        driver.back_to_captcha()
-                    delay(20)
-                else:
-                    driver.reload_captcha()
-                    driver.download(img_file)
-                    solution_text = captcha_solver()
                 driver.download(img_file)
-                comparator.set_curr()
+                comparator.put()
                 comparator.run()
+                driver.enter_captcha(solution_text)
+
+                if not comparator.same:
+                    if not driver.valid():
+                        driver.reload_captcha()
+                        comparator.reset()
+                        solution_text = captcha_solver()
+                        driver.enter_captcha(solution_text)
+
+                if driver.are_appointments():
+                    alerter.whatsapp('Your appointment code is here', 4)
+                    alerter.email('There are Appointments!')
+                    quick_lunch(os.environ['appointments_url'])
+                    # driver.set_appointment()
+                    delay(120)
+                else:
+                    driver.back_to_captcha()
+                delay(5)
 
         except KeyboardInterrupt:
             driver.quit()
