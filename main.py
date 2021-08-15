@@ -6,14 +6,19 @@ from PIL import Image
 from twilio.rest import Client
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException, TimeoutException
 from anticaptchaofficial.imagecaptcha import imagecaptcha
 
 
 class Driver:
     def __init__(self, headless=True):
-        self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=self.set_options(headless))
+        self.driver = webdriver.Chrome(ChromeDriverManager().install(),
+                                       desired_capabilities=self.set_desired_capabilities(),
+                                       options=self.set_options(headless))
+        self.wait = WebDriverWait(self.driver, timeout=10)
         self.driver.implicitly_wait(2)
 
     def open(self, url):
@@ -24,6 +29,13 @@ class Driver:
 
     def quit(self):
         self.driver.quit()
+
+    @staticmethod
+    def set_desired_capabilities():
+        caps = DesiredCapabilities().CHROME
+        caps["pageLoadStrategy"] = "normal"
+        # caps["pageLoadStrategy"] = "none"  # Do not wait for full page load
+        return caps
 
     @staticmethod
     def set_options(headless):
@@ -43,8 +55,6 @@ class Driver:
         return options
 
     def fill_up_form(self, id_number, birthdate):
-        self.driver.find_element(By.CSS_SELECTOR, 'button#j_idt71').click()
-        self.driver.find_element(By.XPATH, '//span[contains(text(),"Efetuar")]').click()
         self.driver.find_element(By.XPATH, '//input[@id = "scheduleForm:tabViewId:ccnum"]').send_keys(id_number)
         self.driver.find_element(
             By.XPATH, '//input[@id = "scheduleForm:tabViewId:dataNascimento_input"]').send_keys(birthdate)
@@ -190,7 +200,7 @@ def quick_lunch(url):
 
 
 if __name__ == '__main__':
-    appointments_url = 'https://agendamentosonline.mne.pt/AgendamentosOnline/index.jsf'
+    appointments_url = 'https://agendamentosonline.mne.pt/AgendamentosOnline/app/scheduleAppointmentForm.jsf'
     img_file = 'captcha.png'
 
     captcha_solver = CaptchaSolver(img_file)
