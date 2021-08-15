@@ -5,7 +5,6 @@ import yagmail
 from PIL import Image
 from twilio.rest import Client
 from selenium import webdriver
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException, TimeoutException
 from webdriver_manager.chrome import ChromeDriverManager
