@@ -8,7 +8,7 @@ from selenium import webdriver
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException
+from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException, TimeoutException
 from webdriver_manager.chrome import ChromeDriverManager
 from anticaptchaofficial.imagecaptcha import imagecaptcha
 
@@ -214,6 +214,6 @@ if __name__ == '__main__':
                         delay(5 * 60)
         except KeyboardInterrupt:
             driver.quit()
-        except (NoSuchElementException, ElementNotInteractableException):
+        except (NoSuchElementException, ElementNotInteractableException, TimeoutException):
             alerter.whatsapp('process broke')
             driver.quit()
