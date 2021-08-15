@@ -5,7 +5,6 @@ import yagmail
 from PIL import Image
 from twilio.rest import Client
 from selenium import webdriver
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException, TimeoutException
@@ -17,7 +16,6 @@ class Driver:
     def __init__(self, headless=True):
         self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=self.set_options(headless))
         self.driver.implicitly_wait(10)
-        self.wait = WebDriverWait(self.driver, 15)
 
     def open(self, url):
         self.driver.get(url)
@@ -71,9 +69,6 @@ class Driver:
         except ElementNotInteractableException:
             pass
         self.driver.find_element(By.XPATH, '//span[contains(text(),"Calendarizar")]').click()  # Calendarizar
-
-        self.wait.until(EC.presence_of_element_located((
-            By.CSS_SELECTOR, '[for="grantSchedulingFormID:captchaCode"]')))  # Captcha Solution
 
     def enter_captcha(self, text):
         print('enter captcha')
