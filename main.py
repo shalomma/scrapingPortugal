@@ -43,8 +43,8 @@ class Driver:
         return options
 
     def fill_up_form(self, id_number, birthdate):
-        self.driver.find_element(By.CSS_SELECTOR, 'button#j_idt71').click()  # Accept
-        self.driver.find_element(By.XPATH, '//span[contains(text(),"Efetuar")]').click()  # Efetuar agendamento
+        self.driver.find_element(By.CSS_SELECTOR, 'button#j_idt71').click()
+        self.driver.find_element(By.XPATH, '//span[contains(text(),"Efetuar")]').click()
         self.driver.find_element(By.XPATH, '//input[@id = "scheduleForm:tabViewId:ccnum"]').send_keys(id_number)
         self.driver.find_element(
             By.XPATH, '//input[@id = "scheduleForm:tabViewId:dataNascimento_input"]').send_keys(birthdate)
@@ -61,13 +61,13 @@ class Driver:
             self.driver.find_element(
                 By.XPATH, '//div[@id="scheduleForm:atocons_panel"]//ul[contains(@class,"ui-widget-content")]/li[2]')
         self.driver.execute_script("arguments[0].click();", consular_elem)  # Ato Consular
-        self.driver.find_element(By.XPATH, '//span[contains(text(),"Ato Consular")]').click()  # Adicionar Ato Consular
-        self.driver.find_element(By.CSS_SELECTOR, 'div.ui-chkbox-box.ui-widget').click()  # declaro condições
+        self.driver.find_element(By.XPATH, '//span[contains(text(),"Ato Consular")]').click()
+        self.driver.find_element(By.CSS_SELECTOR, 'div.ui-chkbox-box.ui-widget').click()  # checkbox
         try:
             self.driver.find_element(By.CSS_SELECTOR, 'button#j_idt263').click()
         except ElementNotInteractableException:
             pass
-        self.driver.find_element(By.XPATH, '//span[contains(text(),"Calendarizar")]').click()  # Calendarizar
+        self.driver.find_element(By.XPATH, '//span[contains(text(),"Calendarizar")]').click()
 
     def enter_captcha(self, text):
         print('enter captcha')
