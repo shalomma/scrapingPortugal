@@ -198,7 +198,7 @@ if __name__ == '__main__':
     alerter = Alerter()
 
     while True:
-        driver = Driver(headless=True, page_load=True)
+        driver = Driver(headless=False, page_load=True)
         driver.open(os.environ['appointments_url'])
         driver.fill_up_form(os.environ['id_number'], os.environ['birthdate'])
 
@@ -213,12 +213,12 @@ if __name__ == '__main__':
                 print('try ', counter)
                 driver.enter_captcha(solution_text)
                 if not driver.valid():
+                    if valid_counter == 4:
+                        break
                     driver.reload_captcha()
                     driver.download(img_file)
                     solution_text = captcha_solver()
                     valid_counter += 1
-                    if valid_counter == 5:
-                        break
                 else:
                     valid_counter = 0
                     if driver.are_appointments():
