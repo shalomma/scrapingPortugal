@@ -206,6 +206,7 @@ if __name__ == '__main__':
         solution_text = captcha_solver()
 
         counter = 0
+        valid_counter = 0
         try:
             while True:
                 counter += 1
@@ -215,7 +216,11 @@ if __name__ == '__main__':
                     driver.reload_captcha()
                     driver.download(img_file)
                     solution_text = captcha_solver()
+                    valid_counter += 1
+                    if valid_counter == 5:
+                        break
                 else:
+                    valid_counter = 0
                     if driver.are_appointments():
                         alerter.whatsapp('Your appointment code is here', 4)
                         alerter.email('There are Appointments!')
@@ -226,9 +231,8 @@ if __name__ == '__main__':
                         driver.back_to_captcha()
                     delay(20)
         except KeyboardInterrupt:
-            driver.quit()
-            sys.exit(1)
+            pass
         except (NoSuchElementException, ElementNotInteractableException, TimeoutException):
             alerter.whatsapp('Your appointment code is broken')
             delay(120)
-            driver.quit()
+        driver.quit()
