@@ -1,5 +1,4 @@
 import os
-import sys
 import time
 import yagmail
 from twilio.rest import Client
@@ -19,7 +18,7 @@ class Driver:
                                        desired_capabilities=self.set_desired_capabilities(page_load),
                                        options=self.set_options(headless))
         self.wait = WebDriverWait(self.driver, timeout=10)
-        self.driver.implicitly_wait(2)
+        self.driver.implicitly_wait(5)
 
     def open(self, url):
         self.driver.get(url)
@@ -84,7 +83,6 @@ class Driver:
         captcha_code = self.driver.find_element(By.CSS_SELECTOR, r'#grantSchedulingFormID\:captchaCode')
         captcha_code.clear()
         captcha_code.send_keys(text)
-        time.sleep(2)
         self.driver.find_element(By.CSS_SELECTOR, r'#grantSchedulingFormID\:grantSchedulingContinueBtnID').click()
 
     def download(self, file):
@@ -93,7 +91,6 @@ class Driver:
             self.driver.find_element(By.XPATH, '//*[@id="exampleCaptcha_CaptchaImageDiv"]').screenshot_as_png
         with open(file, 'wb') as f:
             f.write(screenshot_as_bytes)
-        time.sleep(3)
 
     def reload_captcha(self):
         self.driver.find_element(By.XPATH, '//*[@id="exampleCaptcha_ReloadIcon"]').click()
@@ -224,7 +221,7 @@ if __name__ == '__main__':
                     if driver.are_appointments():
                         alerter.whatsapp('Your appointment code is here', 4)
                         alerter.email('There are Appointments!')
-                        quick_lunch(os.environ['appointments_url'])
+                        # quick_lunch(os.environ['appointments_url'])
                         # driver.set_appointment()
                         delay(120)
                     else:
