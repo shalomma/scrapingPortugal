@@ -8,7 +8,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException, TimeoutException
+from selenium.common.exceptions import \
+    NoSuchElementException, ElementNotInteractableException, TimeoutException, NoSuchWindowException
 from anticaptchaofficial.imagecaptcha import imagecaptcha
 
 
@@ -229,7 +230,7 @@ if __name__ == '__main__':
                     delay(20)
         except KeyboardInterrupt:
             pass
-        except (NoSuchElementException, ElementNotInteractableException, TimeoutException):
+        except (NoSuchElementException, ElementNotInteractableException, TimeoutException, NoSuchWindowException):
             alerter.whatsapp('Your appointment code is broken')
             delay(120)
         driver.quit()
