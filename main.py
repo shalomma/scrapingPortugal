@@ -227,10 +227,11 @@ if __name__ == '__main__':
                         delay(120)
                     else:
                         driver.back_to_captcha()
-                    delay(20)
+                    delay(120)
         except KeyboardInterrupt:
             pass
         except (NoSuchElementException, ElementNotInteractableException, TimeoutException, NoSuchWindowException):
             alerter.whatsapp('Your appointment code is broken')
+            alerter.email('Something went wrong...')
             delay(120)
         driver.quit()
