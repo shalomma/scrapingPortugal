@@ -1,4 +1,5 @@
 import os
+import random
 import time
 import yagmail
 from twilio.rest import Client
@@ -176,7 +177,8 @@ class Alerter:
         )
 
 
-def delay(seconds):
+def quasi_random_delay(seconds):
+    seconds += random.randint(0, 30)
     for i in range(seconds, 0, -1):
         print(f"{i // 60:02d}:{i % 60:02d}", end="\r", flush=True)
         time.sleep(1)
@@ -224,14 +226,14 @@ if __name__ == '__main__':
                         alerter.email('There are Appointments!')
                         # quick_lunch(os.environ['appointments_url'])
                         # driver.set_appointment()
-                        delay(120)
+                        quasi_random_delay(90)
                     else:
                         driver.back_to_captcha()
-                    delay(120)
+                    quasi_random_delay(120)
         except KeyboardInterrupt:
             pass
         except (NoSuchElementException, ElementNotInteractableException, TimeoutException, NoSuchWindowException):
             alerter.whatsapp('Your appointment code is broken')
             alerter.email('Something went wrong...')
-            delay(120)
+            quasi_random_delay(120)
         driver.quit()
