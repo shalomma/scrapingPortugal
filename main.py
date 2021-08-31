@@ -54,9 +54,11 @@ class Driver:
             options.add_argument('no-sandbox')
         return options
 
-    def fill_up_form(self, id_number, birthdate):
+    def fill_up_form(self, id_number, birthdate, delay=0):
         self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '[for="scheduleForm:tabViewId:ccnum"]')))
+        self.quasi_random_delay(0, delay)
         self.driver.find_element(By.XPATH, '//input[@id = "scheduleForm:tabViewId:ccnum"]').send_keys(id_number)
+        self.quasi_random_delay(0, delay)
         self.driver.find_element(
             By.XPATH, '//input[@id = "scheduleForm:tabViewId:dataNascimento_input"]').send_keys(birthdate)
         self.driver.find_element(By.XPATH, '//*[@id="scheduleForm:tabViewId:searchIcon"]/span').click()  # Pesquisar
@@ -135,6 +137,13 @@ class Driver:
             By.XPATH, '//div[@id="scheduleForm:j_idt164"]//span[contains(text(),"Voltar")]').click()
         self.driver.find_element(By.XPATH, '//span[contains(text(),"Calendarizar")]').click()
 
+    @staticmethod
+    def quasi_random_delay(seconds, noise=0):
+        seconds += random.randint(0, noise)
+        for i in range(seconds, 0, -1):
+            print(f"{i // 60:02d}:{i % 60:02d}", end="\r", flush=True)
+            time.sleep(1)
+
 
 class CaptchaSolver:
     def __init__(self, dst_file):
@@ -177,13 +186,6 @@ class Alerter:
         )
 
 
-def quasi_random_delay(seconds):
-    seconds += random.randint(0, 30)
-    for i in range(seconds, 0, -1):
-        print(f"{i // 60:02d}:{i % 60:02d}", end="\r", flush=True)
-        time.sleep(1)
-
-
 def quick_lunch(url):
     driver_ = Driver(headless=False)
     driver_.driver.implicitly_wait(1)
@@ -200,7 +202,7 @@ if __name__ == '__main__':
     while True:
         driver = Driver(headless=False, page_load=True)
         driver.open(os.environ['appointments_url'])
-        driver.fill_up_form(os.environ['id_number'], os.environ['birthdate'])
+        driver.fill_up_form(os.environ['id_number'], os.environ['birthdate'], 5)
 
         driver.download(img_file)
         solution_text = captcha_solver()
@@ -226,14 +228,14 @@ if __name__ == '__main__':
                         alerter.email('There are Appointments!')
                         # quick_lunch(os.environ['appointments_url'])
                         # driver.set_appointment()
-                        quasi_random_delay(90)
+                        driver.quasi_random_delay(90, 30)
                     else:
                         driver.back_to_captcha()
-                    quasi_random_delay(120)
+                    driver.quasi_random_delay(120)
         except KeyboardInterrupt:
             pass
         except (NoSuchElementException, ElementNotInteractableException, TimeoutException, NoSuchWindowException):
             alerter.whatsapp('Your appointment code is broken')
             alerter.email('Something went wrong...')
-            quasi_random_delay(120)
+            driver.quasi_random_delay(120)
         driver.quit()
